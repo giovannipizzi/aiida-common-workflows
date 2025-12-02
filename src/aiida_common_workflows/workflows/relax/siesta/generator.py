@@ -301,6 +301,8 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
             return kpoints_mesh
 
         if 'kpoints' in self._protocols[key]:
+            if isinstance(self._protocols[key]['kpoints'], KpointsData):
+                return self._protocols[key]['kpoints']
             kpoints_mesh = KpointsData()
             kpoints_mesh.set_cell_from_structure(structure)
             kp_dict = self._protocols[key]['kpoints']

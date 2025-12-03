@@ -27,7 +27,7 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
 
         super().__init__(*args, **kwargs)
 
-        self._validate_protocols(self._protocols)
+        self._validate_protocols()
 
     def _initialize_protocols(self):
         """Initialize the protocols class attribute by parsing them from the configuration file."""
@@ -36,12 +36,11 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
         with open(_filepath, encoding='utf-8') as _thefile:
             self._protocols = yaml.full_load(_thefile)
 
-    @staticmethod
-    def _validate_protocols(protocols):
+    def _validate_protocols(self):
         def raise_invalid(message):
             raise RuntimeError(f'invalid protocol registry `{self.__class__.__name__}`: ' + message)
 
-        for k, v in protocols.items():
+        for k, v in self._protocols.items():
             if 'parameters' not in v:
                 raise_invalid(f'protocol `{k}` does not define the mandatory key `parameters`')
             if 'mesh-cutoff' in v['parameters']:
@@ -66,7 +65,9 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
         The ports defined on the specification are the inputs that will be accepted by the ``get_builder`` method.
         """
         super().define(spec)
-        spec.inputs['protocol'].valid_type = ChoiceType(('fast', 'moderate', 'precise', 'verification-PBE-v1', 'custom'))
+        spec.inputs['protocol'].valid_type = ChoiceType(
+            ('fast', 'moderate', 'precise', 'verification-PBE-v1', 'custom')
+        )
         spec.inputs['spin_type'].valid_type = ChoiceType((SpinType.NONE, SpinType.COLLINEAR))
         spec.inputs['relax_type'].valid_type = ChoiceType(
             (RelaxType.NONE, RelaxType.POSITIONS, RelaxType.POSITIONS_CELL, RelaxType.POSITIONS_SHAPE)
@@ -95,9 +96,11 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
         if protocol == 'custom':
             # Override self._protocols
             if custom_protocol is None:
-                raise ValueError('the `custom_protocol` input must be provided when the `protocol` input is set to `custom`.')
+                raise ValueError(
+                    'the `custom_protocol` input must be provided when the `protocol` input is set to `custom`.'
+                )
             self._protocols = {'custom': custom_protocol}
-            self._validate_protocols(self._protocols)
+            self._validate_protocols()
         elif protocol not in self.get_protocol_names():
             import warnings
 

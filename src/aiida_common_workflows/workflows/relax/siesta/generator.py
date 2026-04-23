@@ -93,6 +93,7 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
         reference_workchain = kwargs.get('reference_workchain', None)
 
         # Checks
+        lua = None
         if protocol == 'custom':
             # Override self._protocols
             if custom_protocol is None:
@@ -101,6 +102,8 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
                 )
             self._protocols = {'custom': _copy_nested_dict(custom_protocol)}
             self._validate_protocols()
+            if 'lua' in self._protocols[protocol]:
+                lua = self._protocols[protocol]['lua']
         elif protocol not in self.get_protocol_names():
             import warnings
 
@@ -166,6 +169,9 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
         builder.pseudo_family = pseudo_family
         builder.options = orm.Dict(dict=engines['relax']['options'])
         builder.code = engines['relax']['code']
+
+        if lua is not None:
+            builder.lua = lua
 
         return builder
 

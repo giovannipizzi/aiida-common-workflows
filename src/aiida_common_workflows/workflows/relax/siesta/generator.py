@@ -99,7 +99,7 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
                 raise ValueError(
                     'the `custom_protocol` input must be provided when the `protocol` input is set to `custom`.'
                 )
-            self._protocols = {'custom': custom_protocol}
+            self._protocols = {'custom': _copy_nested_dict(custom_protocol)}
             self._validate_protocols()
         elif protocol not in self.get_protocol_names():
             import warnings
@@ -321,3 +321,15 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
         from aiida.orm import Str
 
         return Str(self._protocols[key]['pseudo_family'])
+
+
+def _copy_nested_dict(value):
+    """
+    Copy nested dictionaries. `Dict` is converted into
+    a (mutable) plain Python `dict`.
+
+    This is needed for custom protocols that contain AiiDA Dicts
+    """
+    if isinstance(value, (dict, orm.Dict)):
+        return {k: _copy_nested_dict(v) for k, v in value.items()}
+    return value

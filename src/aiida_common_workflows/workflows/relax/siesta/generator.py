@@ -142,6 +142,10 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
         # ... spin options (including initial magentization) ...
         if spin_type == SpinType.COLLINEAR:
             parameters['spin'] = 'polarized'
+        if spin_type == SpinType.NON_COLLINEAR:
+            parameters['spin'] = 'non-colinear'
+        if spin_type == SpinType.SPIN_ORBIT:
+            parameters['spin'] = 'spin-orbit'
         if magnetization_per_site is not None:
             if spin_type == SpinType.NONE:
                 import warnings

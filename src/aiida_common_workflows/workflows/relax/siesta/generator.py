@@ -1,5 +1,6 @@
 """Implementation of `aiida_common_workflows.common.relax.generator.CommonRelaxInputGenerator` for SIESTA."""
 import os
+from collections.abc import Sequence
 
 import yaml
 from aiida import engine, orm, plugins
@@ -13,6 +14,20 @@ from ..generator import CommonRelaxInputGenerator
 __all__ = ('SiestaCommonRelaxInputGenerator',)
 
 StructureData = plugins.DataFactory('core.structure')
+
+
+def _to_spherical(v):
+    from math import copysign
+
+    import numpy as np
+
+    x, y, z = v
+    r = np.sqrt(x * x + y * y + z * z)
+    rxy = np.sqrt(x * x + y * y)
+    theta = (180 / np.pi) * np.arccos(z / r) if r > 0 else 0
+    phi = (180 / np.pi) * copysign(np.arccos(x / rxy), y) if rxy > 0 else 0
+
+    return r, theta, phi
 
 
 class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
@@ -63,7 +78,9 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
         """
         super().define(spec)
         spec.inputs['protocol'].valid_type = ChoiceType(('fast', 'moderate', 'precise', 'verification-PBE-v1'))
-        spec.inputs['spin_type'].valid_type = ChoiceType((SpinType.NONE, SpinType.COLLINEAR))
+        spec.inputs['spin_type'].valid_type = ChoiceType(
+            (SpinType.NONE, SpinType.COLLINEAR, SpinType.NON_COLLINEAR, SpinType.SPIN_ORBIT)
+        )
         spec.inputs['relax_type'].valid_type = ChoiceType(
             (RelaxType.NONE, RelaxType.POSITIONS, RelaxType.POSITIONS_CELL, RelaxType.POSITIONS_SHAPE)
         )
@@ -134,6 +151,16 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
                 in_spin_card = '\n'
                 for i, magn in enumerate(magnetization_per_site):
                     in_spin_card += f' {i+1} {magn} \n'
+                in_spin_card += '%endblock dm-init-spin'
+                parameters['%block dm-init-spin'] = in_spin_card
+            if spin_type in [SpinType.NON_COLLINEAR, SpinType.SPIN_ORBIT]:
+                in_spin_card = '\n'
+                for i, magn in enumerate(magnetization_per_site):
+                    if isinstance(magn, Sequence):
+                        r, theta, phi = _to_spherical(magn)
+                        in_spin_card += f' {i+1} {r} {theta} {phi} \n'
+                    else:
+                        in_spin_card += f' {i+1} {magn} \n'
                 in_spin_card += '%endblock dm-init-spin'
                 parameters['%block dm-init-spin'] = in_spin_card
 

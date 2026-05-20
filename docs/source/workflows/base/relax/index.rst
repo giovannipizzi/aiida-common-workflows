@@ -163,12 +163,15 @@ Only ``structure`` and ``engines`` can be specified as a positional argument, al
     input_generator.get_spin_types()
 
 
-* ``magnetization_per_site``. (Type: Python None or a Python list of floats/vectors).
+* ``magnetization_per_site``. (Type: Python None or a Python list of floats/list/tuple/sequence).
   An input devoted to the initial magnetization specifications.
   It accepts a list where each entry refers to an atomic site in the structure.
-  The quantity is passed as the spin polarization in units of electrons, meaning the difference between spin up and spin down electrons for the site.
+  For collinear calculations each entry can be a single float.
+  The quantity is then passed as the spin polarization in units of electrons, meaning the difference between spin up and spin down electrons for the site.
   This also corresponds to the magnetization of the site in Bohr magnetons (μB).
-  For non-collinear spin calculations, a float-valued magnetization is interpreted as a (0, 0, value) vector for that site.
+  For non-collinear spin calculations each entry can either be a single float or a list/tuple/sequence of 3 floats
+  Passing a single float ``value`` is equivalent to passing a sequence ``(0., 0., value)``.
+  The quantity is then passed as a Cartesian magnetization-vector (x, y, z) in units of Bohr magnetons (μB).
   The default for this input is the Python value None and, in case of calculations with spin, the None value signals that the implementation should automatically decide an appropriate default initial magnetization.
   The implementation of such choice is code-dependent and described in the supplementary material of the `S. P. Huber et al., npj Comput. Mater. 7, 136 (2021)`_.
 

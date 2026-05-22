@@ -83,7 +83,9 @@ def test_magnetization_per_site(generator, default_builder_inputs):
     magnetization_per_site = [1.0]
     for spin_type in [SpinType.COLLINEAR, SpinType.NON_COLLINEAR]:
         builder = generator.get_builder(magnetization_per_site=magnetization_per_site, spin_type=spin_type, **inputs)
-        magn = float(builder['parameters']['%block dm-init-spin'].split()[1])
+        magn_string = builder['parameters']['%block dm-init-spin'].splitlines()[1].split()
+        assert len(magn_string) == 2
+        magn = float(magn_string[1])
         assert np.isclose(magn, 1.0)
 
     magnetization_per_site = [(1.0, 0.0, 0.0)]
@@ -96,8 +98,9 @@ def test_magnetization_per_site(generator, default_builder_inputs):
     builder = generator.get_builder(
         magnetization_per_site=magnetization_per_site, spin_type=SpinType.NON_COLLINEAR, **inputs
     )
-    dm_init_string = builder['parameters']['%block dm-init-spin'].split()
-    r, theta, phi = float(dm_init_string[1]), float(dm_init_string[2]), float(dm_init_string[3])
+    magn_string = builder['parameters']['%block dm-init-spin'].splitlines()[1].split()
+    assert len(magn_string) == 4
+    r, theta, phi = float(magn_string[1]), float(magn_string[2]), float(magn_string[3])
     assert np.isclose(r, 1.0)
     assert np.isclose(theta, 90.0)
     assert np.isclose(phi, 0.0)

@@ -169,7 +169,7 @@ Only ``structure`` and ``engines`` can be specified as a positional argument, al
   For collinear calculations each entry can be a single float.
   The quantity is then passed as the spin polarization in units of electrons, meaning the difference between spin up and spin down electrons for the site.
   This also corresponds to the magnetization of the site in Bohr magnetons (μB).
-  For non-collinear spin calculations each entry can either be a single float or a list/tuple/sequence of 3 floats
+  For non-collinear spin calculations each entry can either be a single float or a list/tuple/sequence of 3 floats.
   Passing a single float ``value`` is equivalent to passing a sequence ``(0., 0., value)``.
   The quantity is then passed as a Cartesian magnetization-vector (x, y, z) in units of Bohr magnetons (μB).
   The default for this input is the Python value None and, in case of calculations with spin, the None value signals that the implementation should automatically decide an appropriate default initial magnetization.

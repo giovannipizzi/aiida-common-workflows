@@ -140,13 +140,7 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
                 import warnings
 
                 warnings.warn('`magnetization_per_site` will be ignored as `spin_type` is set to SpinType.NONE')
-            elif spin_type == SpinType.COLLINEAR:
-                in_spin_card = '\n'
-                for i, magn in enumerate(magnetization_per_site):
-                    in_spin_card += f' {i+1} {magn} \n'
-                in_spin_card += '%endblock dm-init-spin'
-                parameters['%block dm-init-spin'] = in_spin_card
-            elif spin_type in [SpinType.NON_COLLINEAR, SpinType.SPIN_ORBIT]:
+            else:
                 in_spin_card = '\n'
                 for i, magn in enumerate(magnetization_per_site):
                     if isinstance(magn, Sequence):

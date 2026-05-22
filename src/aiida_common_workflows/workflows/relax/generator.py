@@ -27,12 +27,12 @@ def validate_inputs(value, _):
     # TODO: ensure all plugins actually honor this new custom_protocol input! (only QE implemented for now)
 
     # Validate non-collinear spin type if magnetization per site is vector-valued
-    if value.get('magnetization_per_site') is not None:
+    if value.get('magnetization_per_site') is not None and value.get('spin_type') not in [
+        SpinType.NON_COLLINEAR,
+        SpinType.SPIN_ORBIT,
+    ]:
         for mag in value.get('magnetization_per_site'):
-            if isinstance(mag, Sequence) and value.get('spin_type') not in [
-                SpinType.NON_COLLINEAR,
-                SpinType.SPIN_ORBIT,
-            ]:
+            if isinstance(mag, Sequence):
                 return (
                     'a vector valued magnetization is only allowed if `spin_type` is `NON_COLLINEAR` or `SPIN_ORBIT`.'
                 )

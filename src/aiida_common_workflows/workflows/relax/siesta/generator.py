@@ -1,5 +1,6 @@
 """Implementation of `aiida_common_workflows.common.relax.generator.CommonRelaxInputGenerator` for SIESTA."""
 import os
+from collections.abc import Sequence
 
 import yaml
 from aiida import engine, orm, plugins
@@ -7,6 +8,7 @@ from aiida.common import exceptions
 
 from aiida_common_workflows.common import ElectronicType, RelaxType, SpinType
 from aiida_common_workflows.generators import ChoiceType, CodeType
+from aiida_common_workflows.utils import to_spherical
 
 from ..generator import CommonRelaxInputGenerator
 
@@ -63,7 +65,9 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
         """
         super().define(spec)
         spec.inputs['protocol'].valid_type = ChoiceType(('fast', 'moderate', 'precise', 'verification-PBE-v1'))
-        spec.inputs['spin_type'].valid_type = ChoiceType((SpinType.NONE, SpinType.COLLINEAR))
+        spec.inputs['spin_type'].valid_type = ChoiceType(
+            (SpinType.NONE, SpinType.COLLINEAR, SpinType.NON_COLLINEAR, SpinType.SPIN_ORBIT)
+        )
         spec.inputs['relax_type'].valid_type = ChoiceType(
             (RelaxType.NONE, RelaxType.POSITIONS, RelaxType.POSITIONS_CELL, RelaxType.POSITIONS_SHAPE)
         )
@@ -123,17 +127,27 @@ class SiestaCommonRelaxInputGenerator(CommonRelaxInputGenerator):
         if threshold_stress:
             parameters['md-max-stress-tol'] = str(threshold_stress) + ' eV/Ang**3'
         # ... spin options (including initial magentization) ...
-        if spin_type == SpinType.COLLINEAR:
+        if spin_type == SpinType.NONE:
+            parameters['spin'] = 'non-polarized'
+        elif spin_type == SpinType.COLLINEAR:
             parameters['spin'] = 'polarized'
+        elif spin_type == SpinType.NON_COLLINEAR:
+            parameters['spin'] = 'non-colinear'
+        elif spin_type == SpinType.SPIN_ORBIT:
+            parameters['spin'] = 'spin-orbit'
         if magnetization_per_site is not None:
             if spin_type == SpinType.NONE:
                 import warnings
 
                 warnings.warn('`magnetization_per_site` will be ignored as `spin_type` is set to SpinType.NONE')
-            if spin_type == SpinType.COLLINEAR:
+            else:
                 in_spin_card = '\n'
                 for i, magn in enumerate(magnetization_per_site):
-                    in_spin_card += f' {i+1} {magn} \n'
+                    if isinstance(magn, Sequence):
+                        r, theta, phi = to_spherical(magn)
+                        in_spin_card += f' {i+1} {r} {theta} {phi} \n'
+                    else:
+                        in_spin_card += f' {i+1} {magn} \n'
                 in_spin_card += '%endblock dm-init-spin'
                 parameters['%block dm-init-spin'] = in_spin_card
 

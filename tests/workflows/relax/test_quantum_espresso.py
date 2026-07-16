@@ -74,7 +74,7 @@ def test_supported_relax_types(generator, default_builder_inputs):
         assert isinstance(builder, engine.ProcessBuilder)
 
 
-@pytest.mark.usefixtures('sssp')
+@pytest.mark.usefixtures('sssp', 'pseudo_dojo_upf_family')
 def test_supported_spin_types(generator, default_builder_inputs):
     """Test calling ``get_builder`` for the supported ``spin_types``."""
     inputs = default_builder_inputs

@@ -423,13 +423,14 @@ def pseudo_dojo_psp8_family(generate_psp8_data):
 
     return family
 
+
 @pytest.fixture(scope='session')
 def pseudo_dojo_upf_family(generate_upf_data):
     """Create a PseudoDojo UPF pseudo potential family from scratch.
-    
+
     This is required for SOC calculations with QE.
     """
-    from aiida.plugins import GroupFactory, DataFactory
+    from aiida.plugins import DataFactory, GroupFactory
 
     PseudoDojoFamily = GroupFactory('pseudo.family.pseudo_dojo')  # noqa: N806
     label = 'PseudoDojo/0.4/PBEsol/FR/standard/upf'
@@ -458,7 +459,7 @@ def pseudo_dojo_upf_family(generate_upf_data):
 
         family = PseudoDojoFamily.create_from_folder(
             pathlib.Path(dirpath), label, pseudo_type=DataFactory('pseudo.upf')
-            )
+        )
 
     for stringency, cutoffs in cutoffs_dict.items():
         family.set_cutoffs(cutoffs, stringency, unit='Ry')

@@ -1,8 +1,8 @@
 """Implementation of `aiida_common_workflows.common.relax.generator.CommonRelaxInputGenerator` for Quantum ESPRESSO."""
+from collections.abc import Sequence
 from importlib import resources
 
 import yaml
-from collections.abc import Sequence
 from aiida import engine, orm, plugins
 
 from aiida_common_workflows.common import ElectronicType, RelaxType, SpinType
@@ -101,7 +101,9 @@ class QuantumEspressoCommonRelaxInputGenerator(CommonRelaxInputGenerator):
         spec.inputs['protocol'].valid_type = ChoiceType(
             ('fast', 'balanced', 'stringent', 'moderate', 'precise', 'verification-PBE-v1', 'custom')
         )
-        spec.inputs['spin_type'].valid_type = ChoiceType((SpinType.NONE, SpinType.COLLINEAR, SpinType.NON_COLLINEAR, SpinType.SPIN_ORBIT))
+        spec.inputs['spin_type'].valid_type = ChoiceType(
+            (SpinType.NONE, SpinType.COLLINEAR, SpinType.NON_COLLINEAR, SpinType.SPIN_ORBIT)
+        )
         spec.inputs['relax_type'].valid_type = ChoiceType(
             tuple(t for t in RelaxType if t not in (RelaxType.VOLUME, RelaxType.POSITIONS_VOLUME))
         )

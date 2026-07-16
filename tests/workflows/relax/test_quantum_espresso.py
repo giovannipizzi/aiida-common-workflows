@@ -208,13 +208,13 @@ def test_magnetization_per_site(generator, generate_code, generate_structure):
     assert builder['base']['pw']['parameters']['SYSTEM']['starting_magnetization'] == {'Si': 0.0, 'Ge': 0.025}
 
     # Test: Vector magnetization with COLLINEAR should raise error
-    Z = {
+    z_values = {
         'Si': 4,
         'Ge': 4,
     }
     magnetization_per_site = [(1.0, 0.0, 0.0), (1.0, 0.0, 0.0)]
     magnetization_per_site = [
-        tuple(np.array(magnetization_per_site[i]) * Z[site.kind_name]) for i, site in enumerate(structure.sites)
+        tuple(np.array(magnetization_per_site[i]) * z_values[site.kind_name]) for i, site in enumerate(structure.sites)
     ]
     with pytest.raises(ValueError, match='vector valued magnetization'):
         builder = generator.get_builder(
@@ -227,7 +227,7 @@ def test_magnetization_per_site(generator, generate_code, generate_structure):
     # Test: Non-collinear with vector magnetization
     magnetization_per_site = [(0.0, 0.0, 3.0), (0.0, 0.0, 3.0)]
     magnetization_per_site = [
-        tuple(np.array(magnetization_per_site[i]) * Z[site.kind_name]) for i, site in enumerate(structure.sites)
+        tuple(np.array(magnetization_per_site[i]) * z_values[site.kind_name]) for i, site in enumerate(structure.sites)
     ]
     builder = generator.get_builder(
         structure=structure,
@@ -249,7 +249,7 @@ def test_magnetization_per_site(generator, generate_code, generate_structure):
     # Test: Different magnetization directions
     magnetization_per_site = [(1.0, 0.0, 0.0), (1.0, 0.0, 0.0)]
     magnetization_per_site = [
-        tuple(np.array(magnetization_per_site[i]) * Z[site.kind_name]) for i, site in enumerate(structure.sites)
+        tuple(np.array(magnetization_per_site[i]) * z_values[site.kind_name]) for i, site in enumerate(structure.sites)
     ]
     print(f'DEBUG: magnetization_per_site after scaling: {magnetization_per_site}')
     print(f'DEBUG: structure.sites: {[(site.kind_name, site.position) for site in structure.sites]}')
